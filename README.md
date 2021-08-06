@@ -1,6 +1,6 @@
 # A Simple and Strong Baseline: Progressively Region-based Scene Text Removal Networks
 
-Unofficial Pytorch implementation of PERT | ([paper](https://arxiv.org/pdf/2106.13029.pdf))
+Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.13029.pdf) | pretrained_model(open soon)
 
 *NOTE* For now the global-aware similarity loss(GS in the paper) is not working.
 

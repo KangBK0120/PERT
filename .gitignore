@@ -1,4 +1,7 @@
-
+checkpoints/
+samples/
+test/
+test_samples/
 # PyCharm
 .idea/
 
