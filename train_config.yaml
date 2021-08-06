@@ -1,0 +1,37 @@
+gpu: 7
+num_iterative_stage: 3
+model_save_path: ./checkpoints
+sample_save_path: ./samples
+epoch: 200
+sample_interval: 100
+model_save_interval: 500
+
+data:
+  train_data_root: /data/SCUT-enstext/train
+  input_size: [512, 512]
+  batch_size: 4
+
+optimizer:
+  lr: 0.0001
+  beta1: 0.5
+  beta2: 0.9
+
+loss_weight:
+  dice_weight: 1
+  gs_weight: 1
+  neg_ssim_weight: 1
+  rs_weight: 1
+  vgg_weight: 1
+dice_loss_param:
+  smooth: 1.0
+gs_loss_param:
+  kernel_sizes: [1, 4, 8]
+neg_ssim_loss_param:
+  window_size: 11
+rs_loss_param:
+  lambda_out: 13
+  lambda_p1: 10
+  lambda_p2: 12
+  beta_out: 2
+  beta_p1: 0.8
+  beta_p2: 1

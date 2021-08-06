@@ -1,0 +1,9 @@
+gpu: 6
+num_iterative_stage: 3
+sample_save_path: ./test_samples
+model_path: ./checkpoints/model.pth
+
+data:
+  test_data_root: /data/SCUT-enstext/test
+  input_size: [512, 512]
+  batch_size: 16
