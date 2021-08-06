@@ -1,12 +1,16 @@
 # A Simple and Strong Baseline: Progressively Region-based Scene Text Removal Networks
 
-Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.13029.pdf) | pretrained_model(open soon)
+Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.13029.pdf)
 
 *NOTE* For now the global-aware similarity loss(GS in the paper) is not working.
 
 *NOTE* As the Convolution output channel numbers are not opened in the original paper, I set the numbers arbitrarily.
 
 The models is a little bit larger than the one in the paper (14.0M parameters in the paper, 15M in this codes)
+
+![image](https://user-images.githubusercontent.com/25279765/128448904-d236824a-f8c1-4aeb-b409-9d3c41f48a77.png)
+
+The reproduced results from SCUT-enstext test dataset. Input images, network outputs, ground truths.
 
 ## Getting Started
 
@@ -15,7 +19,8 @@ The models is a little bit larger than the one in the paper (14.0M parameters in
 I've trained and tested the codes on a single RTX 3090.
 
 #### Requirements
-- pytorch >= 1.9.0 (may work with the lower versions, not tested)
+- pytorch == 1.9.0 (may work with the lower versions, but not tested)
+- torchvision
 - kornia == 0.5.0
 - spatial-correlation-sampler
 - opencv-python
