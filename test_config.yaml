@@ -1,7 +1,7 @@
 gpu: 6
 num_iterative_stage: 3
 sample_save_path: ./test_samples
-model_path: ./checkpoints/model_49_1.pth
+model_path: ./checkpoints/model.pth
 
 dataset: SCUT-enstext
 data:

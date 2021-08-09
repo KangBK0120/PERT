@@ -42,8 +42,12 @@ class Tester:
                 for stage in range(self.config.num_iterative_stage):
                     _, _, _, out = self.pert(input_image, i_before)
                     i_before = out.clone()
-                    save_image(
-                        torch.cat([input_image, out, ground_truth], dim=0),
-                        os.path.join(self.config.sample_save_path, f"out_{iter}.jpg"),
-                        nrow=self.config.data.batch_size,
-                    )
+                if self.config.dataset == "SCUT-enstext":
+                    result = torch.cat([input_image, out, ground_truth], dim=0)
+                else:
+                    result = torch.cat([input_image, out], dim=0)
+                save_image(
+                    result,
+                    os.path.join(self.config.sample_save_path, f"out_{iter}.jpg"),
+                    nrow=self.config.data.batch_size,
+                )
