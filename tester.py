@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
 from models.pert import PERT
-from dataset import ErasingData
+from dataset import ErasingData, OWNData
 
 
 class Tester:
@@ -18,7 +18,12 @@ class Tester:
         self.pert.load_state_dict(torch.load(self.config.model_path))
         self.pert = self.pert.to(self.device)
 
-        dataset = ErasingData(self.config.data.test_data_root, self.config.data.input_size, False)
+        if self.config.dataset == "SCUT-enstext":
+            dataset = ErasingData(
+                self.config.data.test_data_root, self.config.data.input_size, False
+            )
+        else:
+            dataset = OWNData(self.config.data.test_data_root, self.config.data.input_size)
         self.loader = DataLoader(
             dataset, batch_size=self.config.data.batch_size, shuffle=True, pin_memory=True
         )
@@ -32,7 +37,7 @@ class Tester:
                 ground_truth.to(self.device),
                 mask.to(self.device),
             )
-            i_before = ground_truth.clone()
+            i_before = input_image.clone()
             with torch.no_grad():
                 for stage in range(self.config.num_iterative_stage):
                     _, _, _, out = self.pert(input_image, i_before)

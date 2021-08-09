@@ -6,6 +6,7 @@ import glob
 import numpy as np
 
 from PIL import Image
+import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 
@@ -67,6 +68,25 @@ class ErasingData(Dataset):
         ground_truth = self.img_transforms(gt.convert("RGB"))
 
         return input_image, ground_truth, mask
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+class OWNData(Dataset):
+    def __init__(self, data_root, load_size) -> None:
+        super(OWNData, self).__init__()
+        self.root = data_root
+        self.image_files = glob.glob(f"{self.root}/*.jpg")
+
+        self.load_size = load_size
+        self.img_transforms = image_transforms(load_size)
+
+    def __getitem__(self, index):
+        img = Image.open(self.image_files[index])
+        input_image = self.img_transforms(img.convert("RGB"))
+
+        return input_image, torch.zeros_like(input_image), torch.zeros_like(input_image)
 
     def __len__(self):
         return len(self.image_files)

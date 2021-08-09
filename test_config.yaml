@@ -1,9 +1,10 @@
 gpu: 6
 num_iterative_stage: 3
 sample_save_path: ./test_samples
-model_path: ./checkpoints/model.pth
+model_path: ./checkpoints/model_49_1.pth
 
+dataset: SCUT-enstext
 data:
-  test_data_root: /data/SCUT-enstext/test
-  input_size: [512, 512]
-  batch_size: 16
+  test_data_root: /home/byeongkyu/vampsabbath
+  input_size: [1024, 1024]
+  batch_size: 1
