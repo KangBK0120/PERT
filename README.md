@@ -8,7 +8,7 @@ Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.1
 
 The models is a little bit larger than the one in the paper (14.0M parameters in the paper, 15M in this codes)
 
-![PERT_output](https://user-images.githubusercontent.com/25279765/128653207-adf2795c-3201-4c86-a46c-e050af519dc5.jpg)
+![PERT_output](https://user-images.githubusercontent.com/25279765/128654640-46adae94-7103-4ca9-bac9-dfe9d62395ec.jpg)
 
 
 The reproduced results from SCUT-enstext test dataset. Input images, network outputs, ground truths.
