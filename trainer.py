@@ -53,7 +53,7 @@ class Trainer:
                     ground_truth.to(self.device),
                     mask.to(self.device),
                 )
-                i_before = ground_truth.clone()
+                i_before = input_image.clone()
                 loss = 0
                 for stage in range(self.config.num_iterative_stage):
                     mask_out, p1_out, p2_out, out = self.pert(input_image, i_before)
