@@ -2,8 +2,6 @@
 
 Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.13029.pdf)
 
-*NOTE* For now the global-aware similarity loss(GS in the paper) is not working.
-
 *NOTE* As the Convolution output channel numbers are not opened in the original paper, I set the numbers arbitrarily.
 
 The models is a little bit larger than the one in the paper (14.0M parameters in the paper, 15M in this codes)
