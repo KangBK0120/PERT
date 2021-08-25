@@ -19,7 +19,8 @@ class Trainer:
     def __init__(self, config):
         self.config = config
 
-        self.device = torch.device(f"cuda:{self.config.gpu}")
+        os.environ["CUDA_VISIBLE_DEVICES"] = f"{self.config.gpu}"
+        self.device = torch.device(f"cuda:0")
 
         self.pert = PERT().to(self.device)
         # print(sum(p.numel() for p in self.pert.parameters() if p.requires_grad))
@@ -65,7 +66,7 @@ class Trainer:
                 print(
                     f"Epoch {epoch + 1}/{self.config.epoch} iteration {iter + 1}/{len(self.loader)} Loss: {loss.item()}"
                 )
-                if (iter % self.config.sample_interval) == 0:
+                if (iter % self.config.sample_interval) == 0 or iter + 1 == len(self.loader):
                     save_image(
                         torch.cat([input_image, out, ground_truth], dim=0),
                         os.path.join(
@@ -73,7 +74,7 @@ class Trainer:
                         ),
                         nrow=self.config.data.batch_size,
                     )
-                if (iter % self.config.model_save_interval) == 0:
+                if (iter % self.config.model_save_interval) == 0 or iter + 1 == len(self.loader):
                     torch.save(
                         self.pert.state_dict(),
                         os.path.join(
