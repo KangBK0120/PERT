@@ -4,6 +4,8 @@ sample_save_path: ./test_samples
 model_path: ./checkpoints/model.pth
 
 dataset: SCUT-enstext
+input_concat: False
+evaluation: True
 data:
   test_data_root: /data/SCUT-enstext/test
   input_size: [512, 512]

@@ -17,8 +17,8 @@ optimizer:
   beta2: 0.9
 
 loss_weight:
-  dice_weight: 1
-  gs_weight: 1
+  dice_weight: 5
+  gs_weight: 0.00000001
   neg_ssim_weight: 1
   rs_weight: 1
   vgg_weight: 1
