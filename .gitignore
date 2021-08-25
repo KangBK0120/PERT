@@ -1,5 +1,4 @@
-checkpoints/
-samples/
+results
 test/
 test_samples/
 # PyCharm
