@@ -42,20 +42,20 @@ def image_transforms(loadSize):
 
 
 class ErasingData(Dataset):
-    def __init__(self, data_root, load_size, training=True):
+    def __init__(self, data_root, load_size, mode="train"):
         super(ErasingData, self).__init__()
         self.root = data_root
-        self.image_files = [x.split("/")[-1] for x in glob.glob(f"{self.root}/all_images/*.jpg")]
+        self.image_names = [x.split("/")[-1] for x in glob.glob(f"{self.root}/all_images/*.jpg")]
 
         self.load_size = load_size
         self.img_transforms = image_transforms(load_size)
-        self.training = training
+        self.mode = mode
 
     def __getitem__(self, index):
-        img = Image.open(f"{self.root}/all_images/{self.image_files[index]}")
-        mask = Image.open(f"{self.root}/mask/{self.image_files[index]}")
-        gt = Image.open(f"{self.root}/all_labels/{self.image_files[index]}")
-        if self.training:
+        img = Image.open(f"{self.root}/all_images/{self.image_names[index]}")
+        mask = Image.open(f"{self.root}/mask/{self.image_names[index]}")
+        gt = Image.open(f"{self.root}/all_labels/{self.image_names[index]}")
+        if self.mode == "train":
             all_input = [img, mask, gt]
             all_input = random_horizontal_flip(all_input)
             all_input = random_rotate(all_input)
@@ -67,10 +67,13 @@ class ErasingData(Dataset):
         mask = self.img_transforms(mask.convert("L"))
         ground_truth = self.img_transforms(gt.convert("RGB"))
 
-        return input_image, ground_truth, mask
+        if self.mode == "train":
+            return input_image, ground_truth, mask
+        else:
+            return input_image, ground_truth, mask, self.image_names[index]
 
     def __len__(self):
-        return len(self.image_files)
+        return len(self.image_names)
 
 
 class OWNData(Dataset):
