@@ -16,14 +16,12 @@ class GlobalAwareSimilarityLoss(nn.Module):
         self.l2 = nn.MSELoss()
 
     def forward(self, out_features: List[torch.Tensor], gt_features: List[torch.Tensor]):
-
         loss = 0
-        batch_size = out_features[0].size(0)
+
         for i in range(len(out_features)):
             for kernel_size in self.kernel_sizes:
                 sampler = SpatialCorrelationSampler(kernel_size=kernel_size)
-                gamma_out = sampler(out_features[i], F.normalize(out_features[i]).clone())
-                gamma_gt = sampler(gt_features[i], F.normalize(gt_features[i]))
-
-                loss += self.l2(gamma_out, gamma_gt)
+                gamma_out = sampler(out_features[i], out_features[i].clone())
+                gamma_gt = sampler(gt_features[i], gt_features[i].clone())
+                loss += self.l2(gamma_out, gamma_gt) / (kernel_size ** 2)
         return loss

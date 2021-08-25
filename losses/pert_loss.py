@@ -44,7 +44,7 @@ class PERTLoss(nn.Module):
 
         dice_loss = self.dice_weight * self.dice(mask_out, mask_gt)
 
-        # gs_loss = self.gs_weight * self.gs(out_vgg_feats, gt_vgg_feats)
+        gs_loss = self.gs_weight * self.gs(out_vgg_feats, gt_vgg_feats)
 
         neg_sim_loss = self.neg_ssim_weight * self.neg_ssim(image_out, image_gt)
 
@@ -66,4 +66,4 @@ class PERTLoss(nn.Module):
 
         vgg_loss = self.vgg_weight * self.vgg_loss(out_vgg_feats, gt_vgg_feats)
 
-        return dice_loss + neg_sim_loss + rs_loss + vgg_loss  # + gs_loss
+        return dice_loss + neg_sim_loss + rs_loss + vgg_loss + gs_loss
