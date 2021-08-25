@@ -12,6 +12,6 @@ class CFL(nn.Module):
     ) -> torch.Tensor:
         scale_factor = out_img.size(-1) / original_img.size(-1)
         mask_re = F.interpolate(mask, scale_factor=scale_factor)
-        gt_re = F.interpolate(original_img, scale_factor=scale_factor)
+        origin_re = F.interpolate(original_img, scale_factor=scale_factor)
 
-        return torch.mul(mask_re, out_img) + torch.mul(1 - mask_re, gt_re)
+        return torch.mul(mask_re, out_img) + torch.mul(1 - mask_re, origin_re)
