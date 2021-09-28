@@ -6,7 +6,7 @@ from data_model.dice_loss_param import DiceLossPram
 
 class DiceLoss(nn.Module):
     def __init__(self, dice_loss_param: DiceLossPram):
-        super().__init__()
+        super(DiceLoss, self).__init__()
         self.smooth = dice_loss_param.smooth
 
     def forward(self, input_feat: torch.Tensor, target: torch.Tensor) -> torch.Tensor:

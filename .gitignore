@@ -18,3 +18,5 @@ __pycache__/
 # Others
 .mypy_cache
 .pytest_cache
+
+*.ipynb

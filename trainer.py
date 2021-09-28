@@ -56,9 +56,17 @@ class Trainer:
                 )
                 i_before = input_image.clone()
                 loss = 0
-                for stage in range(self.config.num_iterative_stage):
+                for stage in range(1, self.config.num_iterative_stage + 1):
                     mask_out, p1_out, p2_out, out = self.pert(input_image, i_before)
-                    loss += self.pert_loss(mask_out, p1_out, p2_out, out, mask, ground_truth)
+                    loss += self.pert_loss(
+                        mask_out,
+                        p1_out,
+                        p2_out,
+                        out,
+                        mask,
+                        ground_truth,
+                        stage == self.config.num_iterative_stage,
+                    )
                     i_before = out.clone()
                 loss.backward()
                 self.optimizer.step()
@@ -68,7 +76,15 @@ class Trainer:
                 )
                 if (iter % self.config.sample_interval) == 0 or iter + 1 == len(self.loader):
                     save_image(
-                        torch.cat([input_image, out, ground_truth], dim=0),
+                        torch.cat(
+                            [
+                                input_image,
+                                out,
+                                torch.mul(mask, out) + torch.mul(1 - mask, ground_truth),
+                                ground_truth,
+                            ],
+                            dim=0,
+                        ),
                         os.path.join(
                             self.config.sample_save_path, f"out_{epoch + 1}_{iter + 1}.jpg"
                         ),

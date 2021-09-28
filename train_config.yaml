@@ -21,6 +21,7 @@ loss_weight:
   gs_weight: 0.00000001
   neg_ssim_weight: 1
   rs_weight: 1
+  tv_weight: 0
   vgg_weight: 1
 dice_loss_param:
   smooth: 1.0
