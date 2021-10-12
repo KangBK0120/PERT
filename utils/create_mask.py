@@ -1,4 +1,5 @@
 import glob
+
 from PIL import Image, ImageDraw
 
 fnames = [

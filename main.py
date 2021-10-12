@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
-from config import build_config
 
+from config import build_config
 from tester import Tester
 from trainer import Trainer
 
