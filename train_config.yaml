@@ -1,15 +1,22 @@
-gpu: 7
+gpu: 0
 num_iterative_stage: 3
-model_save_path: ./checkpoints
-sample_save_path: ./samples
+
+path:
+  root: ./results/scut/1019_0
+  model_save_path: ./results/scut/1019_0/checkpoints
+  sample_save_path: ./results/scut/1019_0/samples
+  tensorboard_path: ./results/scut/1019_0/tensorboard
+
 epoch: 200
-sample_interval: 100
-model_save_interval: 500
+sample_interval: 50
+model_save_interval: 1000
 
 data:
-  train_data_root: /data/SCUT-enstext/train
+  name: scut
+  train_data_root: /data2/data/SCUT-enstext/train
+  no_text_sample_rate: 0
   input_size: [512, 512]
-  batch_size: 4
+  batch_size: 8
 
 optimizer:
   lr: 0.0001
@@ -17,10 +24,10 @@ optimizer:
   beta2: 0.9
 
 loss_weight:
-  dice_weight: 5
-  gs_weight: 0.00000001
+  dice_weight: 3
+  gs_weight: 200
   neg_ssim_weight: 1
-  rs_weight: 1
+  rs_weight: 2
   tv_weight: 0
   vgg_weight: 1
 dice_loss_param:

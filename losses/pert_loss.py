@@ -52,16 +52,17 @@ class PERTLoss(nn.Module):
         image_gt: torch.Tensor,
         is_last_stage: bool,
     ):
-        loss = self.dice_weight * self.dice(mask_out, mask_gt)
-        # print(f"DICE:{loss.item()}")
+        loss = dict()
+        loss["dice_loss"] = self.dice_weight * self.dice(mask_out, mask_gt)
 
         if is_last_stage:
             out_vgg_feats = self.extractor(image_out)
             gt_vgg_feats = self.extractor(image_gt)
-
             gs_loss = self.gs_weight * self.gs(out_vgg_feats, gt_vgg_feats)
+            loss["gs_loss"] = gs_loss
 
-            neg_sim_loss = self.neg_ssim_weight * self.neg_ssim(image_out, image_gt)
+            neg_ssim_loss = self.neg_ssim_weight * self.neg_ssim(image_out, image_gt)
+            loss["neg_ssim_loss"] = neg_ssim_loss
 
             mask_p1_gt = F.interpolate(mask_gt, size=image_p1_out.shape[2:])
             image_p1_gt = F.interpolate(image_gt, size=image_p1_out.shape[2:])
@@ -78,13 +79,12 @@ class PERTLoss(nn.Module):
                 image_gt,
                 mask_gt,
             )
+            loss["rs_loss"] = rs_loss
 
             vgg_loss = self.vgg_weight * self.vgg_loss(out_vgg_feats, gt_vgg_feats)
+            loss["vgg_loss"] = vgg_loss
 
             tv_loss = self.tv_weight * self.tv_loss(image_out)
+            loss["tv_loss"] = tv_loss
 
-            # print(
-            #    f"NEG_SSIM:{neg_sim_loss.item()}\tRS:{rs_loss.item()}\tGS:{gs_loss.item()}\tVGG:{vgg_loss.item()}\tTV:{tv_loss.item()}"
-            # )
-            loss += neg_sim_loss + rs_loss + vgg_loss + gs_loss + tv_loss
         return loss

@@ -1,14 +1,14 @@
 import math
 import os
 
-from scipy import signal, ndimage
 import numpy as np
 import torch
+from scipy import ndimage
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
+from dataset import ErasingData, OWNData, Panoplay
 from models.pert import PERT
-from dataset import ErasingData, OWNData
 
 
 class Tester:
@@ -21,14 +21,18 @@ class Tester:
         self.pert.load_state_dict(torch.load(self.config.model_path))
         self.pert = self.pert.to(self.device)
 
-        if self.config.dataset == "SCUT-enstext":
+        if self.config.dataset == "scut":
             dataset = ErasingData(
-                self.config.data.test_data_root, self.config.data.input_size, False
+                self.config.data.test_data_root, self.config.data.input_size, "test"
             )
         else:
             dataset = OWNData(self.config.data.test_data_root, self.config.data.input_size)
+
         self.loader = DataLoader(
-            dataset, batch_size=self.config.data.batch_size, shuffle=True, pin_memory=True
+            dataset,
+            batch_size=self.config.data.batch_siz,
+            shuffle=False,
+            pin_memory=True,
         )
 
         if self.config.evaluation:
@@ -48,42 +52,46 @@ class Tester:
                 ground_truth.to(self.device),
                 mask.to(self.device),
             )
-            i_before = input_image.clone()
-            with torch.no_grad():
-                for stage in range(self.config.num_iterative_stage):
-                    _, _, _, out = self.pert(input_image, i_before)
-                    i_before = out.clone()
-                if self.config.input_concat:
-                    result = torch.cat([input_image, out], dim=0)
-                    if self.config.dataset == "SCUT-enstext":
-                        result = torch.cat([input_image, out, ground_truth], dim=0)
-                    save_image(
-                        result,
-                        os.path.join(self.config.sample_save_path, f"out_{iter}.jpg"),
-                        nrow=self.config.data.batch_size,
-                    )
-                else:
-                    for image_num in range(out.size(0)):
-                        save_image(
-                            out[image_num, :, :, :],
-                            os.path.join(self.config.sample_save_path, image_names[image_num]),
-                        )
 
-                if self.config.evaluation:
-                    mse_list, psnr_list, age_list, peps_list, pceps_list = self.evaluation(
-                        out.cpu(), ground_truth.cpu()
+            out = self.process_input(input_image)
+
+            if self.config.input_concat:
+                result = torch.cat([input_image, out, ground_truth], dim=0)
+                save_image(
+                    result,
+                    os.path.join(self.config.sample_save_path, f"out_{iter}.jpg"),
+                    nrow=len(input_image),
+                )
+            else:
+                for image_num in range(out.size(0)):
+                    save_image(
+                        out[image_num, :, :, :],
+                        os.path.join(self.config.sample_save_path, image_names[image_num]),
                     )
-                    self.metrics["mse"] += mse_list
-                    self.metrics["psnr"] += psnr_list
-                    self.metrics["age"] += age_list
-                    self.metrics["peps"] += peps_list
-                    self.metrics["pceps"] += pceps_list
+            if self.config.evaluation:
+                mse_list, psnr_list, age_list, peps_list, pceps_list = self.evaluation(
+                    out.cpu(), ground_truth.cpu()
+                )
+                self.metrics["mse"] += mse_list
+                self.metrics["psnr"] += psnr_list
+                self.metrics["age"] += age_list
+                self.metrics["peps"] += peps_list
+                self.metrics["pceps"] += pceps_list
+
         if self.config.evaluation:
             print(f"MSE: {sum(self.metrics['mse']) / len(self.metrics['mse'])}")
             print(f"PSNR: {sum(self.metrics['psnr']) / len(self.metrics['psnr'])}")
             print(f"AGE: {sum(self.metrics['age']) / len(self.metrics['age'])}")
             print(f"pEPs: {sum(self.metrics['peps']) / len(self.metrics['peps'])}")
             print(f"pCEPs: {sum(self.metrics['pceps']) / len(self.metrics['pceps'])}")
+
+    def process_input(self, input_image):
+        i_before = input_image.clone()
+        with torch.no_grad():
+            for stage in range(self.config.num_iterative_stage):
+                _, _, _, out = self.pert(i_before, input_image)
+                i_before = out.clone()
+        return out
 
     def evaluation(self, outs, gts):
         assert outs.size(0) == gts.size(0)

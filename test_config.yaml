@@ -1,12 +1,12 @@
-gpu: 6
+gpu: 7
 num_iterative_stage: 3
-sample_save_path: ./test_samples
-model_path: ./checkpoints/model.pth
+sample_save_path: ./results/scut/1018_0/test_result_200
+model_path: ./results/scut/1018_0/checkpoints/model_200_344.pth
 
-dataset: SCUT-enstext
-input_concat: False
-evaluation: True
+dataset: scut
+input_concat: True
+evaluation: False
 data:
-  test_data_root: /data/SCUT-enstext/test
+  test_data_root: /data2/data/SCUT-enstext/test
   input_size: [512, 512]
-  batch_size: 4
+  batch_size: 8

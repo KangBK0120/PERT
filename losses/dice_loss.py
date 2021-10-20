@@ -14,10 +14,7 @@ class DiceLoss(nn.Module):
         target_flat = target.contiguous().view(-1)
         intersection = (input_flat * target_flat).sum()
 
-        return torch.mean(
-            1
-            - (
-                (2.0 * intersection + self.smooth)
-                / (input_flat.sum() + target_flat.sum() + self.smooth)
-            )
+        return 1 - (
+            (2.0 * intersection + self.smooth)
+            / (input_flat.sum() + target_flat.sum() + self.smooth)
         )

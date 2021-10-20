@@ -3,7 +3,6 @@ from typing import List
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from spatial_correlation_sampler import SpatialCorrelationSampler
 
 from data_model.global_aware_sim_param import GlobalAwareSimParam
 
@@ -19,9 +18,21 @@ class GlobalAwareSimilarityLoss(nn.Module):
         loss = 0
 
         for i in range(len(out_features)):
+            B, C = out_features[i].size(0), out_features[i].size(1)
             for kernel_size in self.kernel_sizes:
-                sampler = SpatialCorrelationSampler(kernel_size=kernel_size)
-                gamma_out = sampler(out_features[i], out_features[i].clone())
-                gamma_gt = sampler(gt_features[i], gt_features[i].clone())
-                loss += self.l2(gamma_out, gamma_gt) / (kernel_size ** 2)
+                max_pool_size = out_features[i].size(2) // kernel_size
+                out_F = F.normalize(
+                    F.max_pool2d(out_features[i], max_pool_size, max_pool_size), dim=1
+                )
+                gt_F = F.normalize(
+                    F.max_pool2d(gt_features[i], max_pool_size, max_pool_size), dim=1
+                )
+
+                for height in range(kernel_size):
+                    for width in range(kernel_size):
+                        loss += self.l2(
+                            out_F * out_F[:, :, height, width].view(B, C, 1, 1),
+                            gt_F * gt_F[:, :, height, width].view(B, C, 1, 1),
+                        )
+
         return loss

@@ -22,7 +22,9 @@ class TLN(nn.Module):
             in_channels=512, out_channels=128, kernel_size=3, stride=1, padding=1
         )
         self.conv4 = ConvBlock(in_channels=256, out_channels=32, kernel_size=3, stride=1, padding=1)
-        self.conv5 = ConvBlock(in_channels=32, out_channels=1, kernel_size=1, stride=1, padding=0)
+        self.conv5 = ConvBlock(
+            in_channels=32, out_channels=1, kernel_size=1, stride=1, padding=0, have_relu=False
+        )
         self.relu = nn.ReLU()
 
     def forward(

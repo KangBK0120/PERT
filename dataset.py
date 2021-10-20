@@ -1,14 +1,13 @@
-import os
+import glob
+import json
 import random
 
 import cv2
-import glob
 import numpy as np
-
-from PIL import Image
 import torch
-from torch.utils.data import Dataset
 import torchvision.transforms as transforms
+from PIL import Image
+from torch.utils.data import Dataset
 
 
 def random_horizontal_flip(imgs):
@@ -45,7 +44,9 @@ class ErasingData(Dataset):
     def __init__(self, data_root, load_size, mode="train"):
         super(ErasingData, self).__init__()
         self.root = data_root
-        self.image_names = [x.split("/")[-1] for x in glob.glob(f"{self.root}/all_images/*.jpg")]
+        self.image_names = sorted(
+            [x.split("/")[-1] for x in glob.glob(f"{self.root}/all_images/*.jpg")]
+        )
 
         self.load_size = load_size
         self.img_transforms = image_transforms(load_size)

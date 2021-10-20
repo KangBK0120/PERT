@@ -1,18 +1,19 @@
 import os
 
 import torch
-from torch.utils.data import DataLoader
 import torch.optim as optim
-from torchvision.utils import save_image
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+from torchvision.utils import make_grid, save_image
 
 from data_model.dice_loss_param import DiceLossPram
 from data_model.global_aware_sim_param import GlobalAwareSimParam
 from data_model.loss_weight import LossWeight
 from data_model.neg_ssim_param import NegSSIMPram
 from data_model.region_aware_sim_param import RegionAwareSimilarityParam
-from models.pert import PERT
+from dataset import ErasingData, Panoplay
 from losses.pert_loss import PERTLoss
-from dataset import ErasingData
+from models.pert import PERT
 
 
 class Trainer:
@@ -20,7 +21,7 @@ class Trainer:
         self.config = config
 
         os.environ["CUDA_VISIBLE_DEVICES"] = f"{self.config.gpu}"
-        self.device = torch.device(f"cuda:0")
+        self.device = torch.device("cuda:0")
 
         self.pert = PERT().to(self.device)
         # print(sum(p.numel() for p in self.pert.parameters() if p.requires_grad))
@@ -43,22 +44,24 @@ class Trainer:
             betas=(self.config.optimizer.beta1, self.config.optimizer.beta2),
         )
 
+        self.writer = SummaryWriter(self.config.path.tensorboard_path)
+
     def train(self):
         for epoch in range(self.config.epoch):
-            for iter, (input_image, ground_truth, mask) in enumerate(self.loader):
+            for iter, (original_image, ground_truth, mask) in enumerate(self.loader):
                 self.pert.train()
                 self.optimizer.zero_grad()
 
-                input_image, ground_truth, mask = (
-                    input_image.to(self.device),
+                original_image, ground_truth, mask = (
+                    original_image.to(self.device),
                     ground_truth.to(self.device),
                     mask.to(self.device),
                 )
-                i_before = input_image.clone()
+                i_before = original_image.clone()
                 loss = 0
                 for stage in range(1, self.config.num_iterative_stage + 1):
-                    mask_out, p1_out, p2_out, out = self.pert(input_image, i_before)
-                    loss += self.pert_loss(
+                    mask_out, p1_out, p2_out, out = self.pert(i_before, original_image)
+                    stage_loss = self.pert_loss(
                         mask_out,
                         p1_out,
                         p2_out,
@@ -68,32 +71,84 @@ class Trainer:
                         stage == self.config.num_iterative_stage,
                     )
                     i_before = out.clone()
+                    loss += stage_loss["dice_loss"]
+                    if stage == self.config.num_iterative_stage:
+                        loss += (
+                            stage_loss["gs_loss"]
+                            + stage_loss["neg_ssim_loss"]
+                            + stage_loss["rs_loss"]
+                            + stage_loss["vgg_loss"]
+                            + stage_loss["tv_loss"]
+                        )
+
                 loss.backward()
                 self.optimizer.step()
 
                 print(
                     f"Epoch {epoch + 1}/{self.config.epoch} iteration {iter + 1}/{len(self.loader)} Loss: {loss.item()}"
                 )
+
                 if (iter % self.config.sample_interval) == 0 or iter + 1 == len(self.loader):
-                    save_image(
+
+                    img_grid = make_grid(
                         torch.cat(
                             [
-                                input_image,
+                                original_image,
                                 out,
                                 torch.mul(mask, out) + torch.mul(1 - mask, ground_truth),
                                 ground_truth,
                             ],
                             dim=0,
                         ),
-                        os.path.join(
-                            self.config.sample_save_path, f"out_{epoch + 1}_{iter + 1}.jpg"
-                        ),
-                        nrow=self.config.data.batch_size,
+                        nrow=original_image.size(0),
                     )
+                    save_image(
+                        img_grid,
+                        os.path.join(
+                            self.config.path.sample_save_path, f"out_{epoch + 1}_{iter + 1}.jpg"
+                        ),
+                    )
+
+                    step = epoch * len(self.loader) + iter
+                    self.tensorboard_logging(stage_loss, step)
+                    self.writer.flush()
+
                 if (iter % self.config.model_save_interval) == 0 or iter + 1 == len(self.loader):
                     torch.save(
                         self.pert.state_dict(),
                         os.path.join(
-                            self.config.model_save_path, f"model_{epoch + 1}_{iter + 1}.pth"
+                            self.config.path.model_save_path, f"model_{epoch + 1}_{iter + 1}.pth"
                         ),
                     )
+
+    def tensorboard_logging(self, stage_loss, step):
+        self.writer.add_scalar(
+            "dice_loss",
+            stage_loss["dice_loss"],
+            step,
+        )
+        self.writer.add_scalar(
+            "gs_loss",
+            stage_loss["gs_loss"],
+            step,
+        )
+        self.writer.add_scalar(
+            "neg_ssim_loss",
+            stage_loss["neg_ssim_loss"],
+            step,
+        )
+        self.writer.add_scalar(
+            "rs_loss",
+            stage_loss["rs_loss"],
+            step,
+        )
+        self.writer.add_scalar(
+            "vgg_loss",
+            stage_loss["vgg_loss"],
+            step,
+        )
+        self.writer.add_scalar(
+            "tv_loss",
+            stage_loss["tv_loss"],
+            step,
+        )

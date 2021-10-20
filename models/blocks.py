@@ -5,7 +5,13 @@ import torch.nn.functional as F
 
 class ConvBlock(nn.Module):
     def __init__(
-        self, in_channels: int, out_channels: int, kernel_size: int, stride: int, padding: int
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int,
+        padding: int,
+        have_relu: bool = True,
     ):
         super(ConvBlock, self).__init__()
 
@@ -16,10 +22,16 @@ class ConvBlock(nn.Module):
             stride=stride,
             padding=padding,
         )
-        self.relu = nn.ReLU()
+        if have_relu:
+            self.relu = nn.ReLU()
+        else:
+            self.relu = None
 
     def forward(self, feat: torch.Tensor) -> torch.Tensor:
-        return self.relu(self.conv(feat))
+        if self.relu:
+            return self.relu(self.conv(feat))
+        else:
+            return self.conv(feat)
 
 
 class DeConvBlock(nn.Module):
