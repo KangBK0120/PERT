@@ -1,6 +1,6 @@
 # A Simple and Strong Baseline: Progressively Region-based Scene Text Removal Networks
 
-Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.13029.pdf) | [Pretrained model](https://drive.google.com/file/d/1hJqsgWjAMVPSegq9KWdyXSrJeAgqomsA/view?usp=sharing), NOTE: Not the latest version of code. I will update the model ASAP.
+Unofficial Pytorch implementation of PERT | [paper](https://arxiv.org/pdf/2106.13029.pdf) | [Pretrained model](https://drive.google.com/file/d/1hJqsgWjAMVPSegq9KWdyXSrJeAgqomsA/view?usp=sharing)
 
 *NOTE* As the Convolution output channel numbers are not opened in the original paper, I set the numbers arbitrarily.
 
